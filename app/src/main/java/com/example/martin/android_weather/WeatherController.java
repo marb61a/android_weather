@@ -13,6 +13,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+
 public class WeatherController extends AppCompatActivity {
     // Request Code for permission request callback
     final int REQUEST_CODE = 123;
@@ -23,6 +28,9 @@ public class WeatherController extends AppCompatActivity {
     // Base URL for the OpenWeatherMap API, using HTTPS instead of HTTP is a premium
     // feature and will require payment
     final String WEATHER_URL = "";
+
+    // App ID to use OpenWeather data
+    final String APP_ID = "";
 
     // Time between location updates (5000 milliseconds or 5 seconds)
     final long MIN_TIME = 5000;
@@ -87,12 +95,27 @@ public class WeatherController extends AppCompatActivity {
         mLocationListener = new LocationListener(){
             @Override
             public void onLocationChanged(Location location){
+                Log.d(LOGCAT_TAG, "onLocationChanged() callback received");
+                String longitude = String.valueOf(location.getLongitude());
+                String latitude = String.valueOf(location.getLatitude());
 
+                Log.d(LOGCAT_TAG, "longitude is: " + longitude);
+                Log.d(LOGCAT_TAG, "latitude is: " + latitude);
+
+                // Using the abbreviated lat and lon and getting parameter values
+                // ensure that it is lon and not long that is used
+                RequestParams params = new RequestParams();
+                params.put("lat", latitude);
+                params.put("lon", longitude);
+                params.put("appid", APP_ID);
+                letsDoSomeNetworking(params);
             }
 
             @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                // Using log statements to help with debugging
+                Log.d(LOGCAT_TAG, "onStatusChanged() callback received. Status: " + status);
+                Log.d(LOGCAT_TAG, "2 means AVAILABLE, 1: TEMPORARILY_UNAVAILABLE, 0: OUT_OF_SERVICE");
             }
 
             @Override
@@ -105,6 +128,17 @@ public class WeatherController extends AppCompatActivity {
 
             }
         };
+    }
+
+    // This is the actual networking code. Parameters are already configured.
+    private void letsDoSomeNetworking(RequestParams params){
+        // AsyncHttpClient belongs to the loopj dependency.
+        AsyncHttpClient client = new AsyncHttpClient();
+
+        // You can make a HTTP GET request by providing a URL and necessary parameters
+        client.get(WEATHER_URL, params, new JsonHttpResponseHandler(){
+
+        });
     }
 
     // Freeing up resources when the app enters the paused state.
