@@ -1,5 +1,7 @@
 package com.example.martin.android_weather;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -23,18 +25,31 @@ public class ChangeCityController extends AppCompatActivity {
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 // Go back and destroy the ChangeCityController
                 finish();
             }
         });
 
+
         // EditTexts can have listeners for keyboard presses like hitting the enter key.
-        editTextField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        editTextField.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                return false;
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                String newCity = editTextField.getText().toString();
+                Intent newCityIntent = new Intent(ChangeCityController.this, WeatherController.class);
+
+                // Adds what was entered in the EditText as an extra to the intent.
+                newCityIntent.putExtra("City", newCity);
+
+                // We started this activity for a result, so now we are setting the result.
+                setResult(Activity.RESULT_OK, newCityIntent);
+
+                // This destroys the ChangeCityController.
+                finish();
+                return true;
             }
         });
+
     }
 }

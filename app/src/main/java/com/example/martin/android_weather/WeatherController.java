@@ -106,4 +106,12 @@ public class WeatherController extends AppCompatActivity {
             }
         };
     }
+
+    // Freeing up resources when the app enters the paused state.
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mLocationManager != null) mLocationManager.removeUpdates(mLocationListener);
+    }
 }
