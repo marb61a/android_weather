@@ -60,4 +60,17 @@ public class WeatherDataModel {
 
         return "dont know";
     }
+
+    // Getter methods for temperature, city, and icon name:
+    public String getTemperature() {
+        return mTemperature + "°";
+    }
+
+    public String getCity() {
+        return mCity;
+    }
+
+    public String getIconName() {
+        return mIconName;
+    }
 }

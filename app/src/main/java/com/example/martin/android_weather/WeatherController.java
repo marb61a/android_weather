@@ -1,21 +1,29 @@
 package com.example.martin.android_weather;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONObject;
+import cz.msebera.android.httpclient.Header;
 
 
 public class WeatherController extends AppCompatActivity {
@@ -119,13 +127,13 @@ public class WeatherController extends AppCompatActivity {
             }
 
             @Override
-            public void onProviderEnabled(String s) {
-
+            public void onProviderEnabled(String provider) {
+                Log.d(LOGCAT_TAG, "onProviderEnabled() callback received. Provider: " + provider);
             }
 
             @Override
-            public void onProviderDisabled(String s) {
-
+            public void onProviderDisabled(String provider) {
+                Log.d(LOGCAT_TAG, "onProviderDisabled() callback received. Provider: " + provider);
             }
         };
     }
@@ -137,8 +145,34 @@ public class WeatherController extends AppCompatActivity {
 
         // You can make a HTTP GET request by providing a URL and necessary parameters
         client.get(WEATHER_URL, params, new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
+                Log.d(LOGCAT_TAG, "Success! JSON: " + response.toString());
+                WeatherDataModel weatherData = WeatherDataModel.fromJson(response);
+                updateUI(weatherData);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+
+                Log.e(LOGCAT_TAG, "Fail " + e.toString());
+                Toast.makeText(WeatherController.this, "Request Failed", Toast.LENGTH_SHORT).show();
+
+                Log.d(LOGCAT_TAG, "Status code " + statusCode);
+                Log.d(LOGCAT_TAG, "Here's what we got instead " + response.toString());
+            }
         });
+    }
+
+    // Updates the information shown on screen.
+    private void updateUI(WeatherDataModel weather){
+        mTemperatureLabel.setText(weather.getTemperature());
+        mCityLabel.setText(weather.getCity());
+
+        // Update the icon based on the resource id of the image in the drawable folder.
+        int resourceID = getResources().getIdentifier(weather.getIconName(), "drawable", getPackageName());
+        mWeatherImage.setImageResource(resourceID);
     }
 
     // Freeing up resources when the app enters the paused state.
